@@ -7,11 +7,12 @@
 //
 
 import UIKit
+import MobileCoreServices
 
-class MasterViewController: UITableViewController {
+class MasterViewController: UITableViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     var objects = NSMutableArray()
-
+    var cameraUI:UIImagePickerController = UIImagePickerController()
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -23,7 +24,9 @@ class MasterViewController: UITableViewController {
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
 
         let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
+        let cameraButton = UIBarButtonItem(barButtonSystemItem: .Camera, target: self, action: "presentCamera:")
         self.navigationItem.rightBarButtonItem = addButton
+        self.navigationItem.leftBarButtonItem = cameraButton
     }
 
     override func didReceiveMemoryWarning() {
@@ -35,6 +38,16 @@ class MasterViewController: UITableViewController {
         objects.insertObject(NSDate.date(), atIndex: 0)
         let indexPath = NSIndexPath(forRow: 0, inSection: 0)
         self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+    }
+    
+    func presentCamera(sender: AnyObject) {
+        cameraUI = UIImagePickerController()
+        cameraUI.delegate = self
+        cameraUI.sourceType = UIImagePickerControllerSourceType.SavedPhotosAlbum
+        //cameraUI.mediaTypes = [kUTTypeImage]
+        cameraUI.allowsEditing = true
+        
+        self.presentViewController(cameraUI, animated: true, completion: nil)
     }
 
     // MARK: - Segues
@@ -80,6 +93,23 @@ class MasterViewController: UITableViewController {
         }
     }
 
+    // MARK; - Image
+    func imagePickerControllerDidCancel(picker:UIImagePickerController)
+    {
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func imagePickerController(picker:UIImagePickerController!, didFinishPickingMediaWithInfo info:NSDictionary)
+    {
+        //var mediaType:NSString = info.objectForKey(UIImagePickerControllerEditedImage) as NSString
+        var imageToSave:UIImage
+        
+        imageToSave = info.objectForKey(UIImagePickerControllerOriginalImage) as UIImage
+        
+        UIImageWriteToSavedPhotosAlbum(imageToSave, nil, nil, nil)
+        //self.savedImage()
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
 
 }
 
